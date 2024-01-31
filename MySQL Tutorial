@@ -1,0 +1,99 @@
+#set the database you want to query from
+USE sql_store;
+
+#SELECT --> FROM --> WHERE --> ORDER BY
+
+#retrieve all columns in the database
+SELECT *
+
+#retrieve specific columns
+SELECT customer_id, first_name
+
+#specify the table we want to query from
+FROM customers
+
+#get specific data
+WHERE customer_id = 1
+
+# specify the columns you want to sort by
+ORDER BY first_name
+
+#perform an arithmetic expression and it will be a new column
+SELECT customer_id, first_name, points, points + 10
+
+#create an alias for a column if using an arithmetic expression so it can be easily understood
+SELECT first_name, points, (points + 10) * 100 AS discount_factor
+
+# to get unique results/remove duplicates
+SELECT DISTINCT states
+
+#operands (<, >, <=, >=, =, !=, <>)
+#enclose string in ' '
+
+#to get all customers who were born after a certain date
+WHERE birth_date > '1990-01-01'
+
+WHERE birth_date > '1990-01-01' AND points > 1000
+WHERE birth_date > '1990-01-01' OR points > 1000
+
+#multiple arithmetic 
+WHERE birth_date > '1990-01-01' AND points > 1000
+      state = 'VA'
+
+WHERE NOT birth_date > '1990-01-01' AND points > 1000
+
+# alternative to the OR to combine multiple expressions
+WHERE state IN ('VA', 'FL', 'GA')
+
+#have to combine multiple expressions with OR operator because after OR it becomes a string
+WHERE state = 'VA' OR state = 'GA' OR state = 'FL'
+
+WHERE points BETWEEN 100 AND 3000
+
+#to get the customers whose last name starts with b and whcih has how ever many characters after the b
+WHERE last_name LIKE 'b%'
+
+#to get the customers whose last name has x amount of characters and then ends in a y
+WHERE last_name LIKE '_____y'
+
+-- % any number of chaacters
+-- _ single character
+
+#to search for specific things
+WHERE last_name REGEXP 'field'
+
+#to represent the beginning of a string ^
+WHERE last_name REGEXP '^field'
+
+#to represent the end of a string %
+WHERE last_name REGEXP 'field$'
+
+#to find multiple things
+WHERE last_name REGEXP 'field|mac'
+
+#to find last names that have ge, or ie, or me
+WHERE last_name REGEXP '[gim]e'
+
+WHERE last_name REGEXP '[a-h]e'
+
+#search for all customers who don't have a phone value
+WHERE phone IS NULL
+
+#design mode to edit table columns etc
+#yellow key is primary key column for the table
+
+#to order a column in descending fashion
+ORDER by first_name DESC
+
+#to sort by multiple columns
+ORDER BY state, first_name
+
+#to get only the first 3 customers for example
+LIMIT 3
+
+#to skip the first 6 records and then give the next 3 records
+LIMIT 6,3
+
+#
+
+
