@@ -94,6 +94,12 @@ LIMIT 3
 #to skip the first 6 records and then give the next 3 records
 LIMIT 6,3
 
-#
+#since the same column is in both tables, must specify which table it will be pulled from, either orders or customers table
+SELECT order_id, orders.customer_id, first_name, last_name
+FROM orders
+JOIN customers
+      ON orders.customer_id = customers.customer_id
 
-
+#can do alias for tables
+FROM order o
+JOIN customers c
