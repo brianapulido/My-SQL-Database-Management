@@ -81,6 +81,7 @@ WHERE phone IS NULL
 
 #design mode to edit table columns etc
 #yellow key is primary key column for the table
+#can have a composite primary key which contains more than one column
 
 #to order a column in descending fashion
 ORDER by first_name DESC
@@ -103,3 +104,227 @@ JOIN customers
 #can do alias for tables
 FROM order o
 JOIN customers c
+
+#join two or more tables
+SELECT 
+      p.date,
+      p.invoice_id,
+      p.amount,
+      c.name,
+      pm.name
+FROM payments p
+JOIN clients c
+      ON p.client_id = c.client_id
+JOIN payment_methods pm
+      ON p.payment_method = pm.payment_method_id
+
+#compound join condition
+SELECT *
+FROM order_items oi
+JOIN order_item_notes oin
+      ON oi.order_id = oin.order_id
+      AND oi.product_id = oin.product_id
+-------
+SELECT *
+FROM orders o
+JOIN customers c
+      ON o.customer_id = c.customer_id
+
+#implicit join syntax using the WHERE clause. This is the same as the above.
+SELECT *
+FROM order o, customers c
+WHERE o.customer_id = c.customer_id
+------
+SELECT 
+      c.customer_id,
+      c.first_name,
+      o.order_id
+FROM customers c
+JOIN orders o
+      ON c.customer_id = o.customer_id
+ORDER BY c.customer_id
+
+#outer join... left join 
+SELECT 
+      c.customer_id,
+      c.first_name,
+      o.order_id
+FROM customers c
+LEFT JOIN orders o
+      ON c.customer_id = o.customer_id
+ORDER BY c.customer_id
+
+#outer join... right join... must switch the order of the tables or else you'll get the same result as a regular join
+SELECT 
+      c.customer_id,
+      c.first_name,
+      o.order_id
+FROM orders o
+RIGHT JOIN customers c
+      ON c.customer_id = o.customer_id
+ORDER BY c.customer_id
+
+#two outer left join
+SELECT 
+      c.customer_id,
+      c.first_name,
+      o.order_id
+      sh.name AS shipper
+FROM customers c
+LEFT JOIN orders o
+      ON c.customer_id = o.customer_id
+LEFT JOIN orders o
+      ON o.shipper_id = sh.shipper_id
+ORDER BY c.customer_id
+
+#to make this easier to read 
+SELECT *
+FROM order_items oi
+JOIN order_item_notes oin
+      ON oi.order_id = oin.order_id AND
+      oi.product_id = oin.product_id
+
+#use the using clause
+SELECT *
+FROM order_items oi
+JOIN order_item_notes oin
+      USING (order_id, product_id)
+
+#cross joins to combine evry record from one table to every record in another table
+SELECT 
+      c.first_name AS customer,
+      p.name AS product
+FROM customers c
+CROSS JOIN products p
+ORDER BY c.first_name
+
+#implicit syntax for a cross join
+SELECT 
+      c.first_name AS customer,
+      p.name AS product
+FROM customers c, orders o
+ORDER BY c.first_name
+
+#unions intro
+SELECT 
+      order_id,
+      order-date,
+      'Active' AS status
+FROM orders
+WHERE order_date >= '2019-01-01'
+
+#return the orders of previous years as archive
+SELECT 
+      order_id,
+      order-date,
+      'Archived' AS status
+FROM orders
+WHERE order_date >= '2019-01-01'
+
+#union is used to combine results from multiple queries
+SELECT 
+      order_id,
+      order-date,
+      'Active' AS status
+FROM orders
+WHERE order_date >= '2019-01-01'
+UNION
+SELECT 
+      order_id,
+      order-date,
+      'Archived' AS status
+FROM orders
+WHERE order_date >= '2019-01-01'
+
+#inserting a single row into a table
+INSERT INTO customers
+VALUES (DEFAULT, 'John', 'Smith', '1990-01-01', NULL, 'address', 'city', 'CA', DEFAULT)
+
+#or alternatively write
+INSERT INTO customers (first_name, last_name, birth_date, address. city, state)
+VALUES ('John', 'Smith', '199001-01', 'address', 'city', 'state')
+
+#inserting multiple rows 
+INSERT INTO shippers (name)
+VALUES ('Shipper1'), ('Shipper2'), ('Shipper3')
+
+#inserting hierarchical rows (into multiple tables)
+INSERT INTO orders (customer_id, order_date, status)
+VALUES (1, '2019-01-02', 1);
+
+INSERT INTO order_items
+VALUES 
+      (LAST_INSERT_ID(), 1, 1, 2.95),
+      (LAST_INSERT_ID(), 1, 1, 3.95)
+
+#creating a copy of a table. the select line a subquery
+CREATE TABLE orders_archived AS
+SELECT * FROM orders
+
+#to delete all the data in a table click on truncate table
+
+#to copy only a subset of data from a table
+INSERT INTO orders_archived
+SELECT *
+FROM orders
+WHERE orders_date < '2019-01-01'
+
+#updating a single row
+UPDATE invoices
+SET payment_total = 10, payment_date = '2019-03-01'
+WHERE invoice_id = 1
+
+#using subqueries in update. this example updates invoices for this one client.
+#it will run the query in parentheses to get the client id and then use it in the WHERE clause above it.
+UPDATE invoices
+SET
+      payment_total - invoice_total * 0.5,
+      payment_date = due_date
+WHERE client_id = 
+            (SELECT client_id
+            FROM clients
+            WHERE name = 'Myworks')
+
+#update invoices for all clients that live in two specific places. use the IN operator to update for multiple records.
+UPDATE invoices
+SET
+      payment_total - invoice_total * 0.5,
+      payment_date = due_date
+WHERE client_id IN
+            (SELECT client_id
+            FROM clients
+            WHERE state IN ('CA', 'NY')
+--------
+#to check to make sure you will update the right data. this shows you we only have 2 NULL records.
+UPDATE invoices
+SET
+      payment_total - invoice_total * 0.5,
+      payment_date = due_date
+SELECT *
+FROM invoices
+WHERE payment_date IS NULL
+
+#then you can run this
+UPDATE invoices
+SET
+      payment_total - invoice_total * 0.5,
+      payment_date = due_date
+WHERE payment_date IS NULL
+--------
+#delete rows
+DELETE FROM invoices
+WHERE invoice_id = 1
+
+SELECT *
+FROM clients
+WHERE name = 'Myworks'
+
+DELETE FROM invoices
+WHERE client_id = (
+      SELECT *
+      FROM clients
+      WHERE name = 'Myworks')
+
+#restoring databases to original state
+-->file menu-->open sql script-->navigate to the directory where you stored the SQL scripts for this course--> open --> execute script -->refresh
+
